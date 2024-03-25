@@ -15,8 +15,25 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.contrib.auth import views as auth_views
+from django.urls import path, re_path
+
+from account.views import LoginView, SignUpView
+from chat.consumers import ChatConsumer
+from chat.views import (all_chatrooms_view, chatroom_view, create_chatroom,
+                        home_view)
+
+websocket_urlpatterns = [
+    re_path(r"ws/chat/(?P<room_name>\w+)/$", ChatConsumer.as_asgi()),
+]
 
 urlpatterns = [
+    path('', home_view, name='home'),
+    path('chatrooms/', all_chatrooms_view, name='chatrooms'),
+    path('chatroom/<int:pk>/', chatroom_view, name='chatroom'),
+    path('create-chatroom/', create_chatroom, name='create_chatroom'),
     path('admin/', admin.site.urls),
+    path('signup/', SignUpView.as_view(), name='signup'),
+    path('login/', LoginView.as_view(), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 ]
